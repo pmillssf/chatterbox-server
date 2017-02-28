@@ -53,13 +53,12 @@ exports.requestHandler = function(request, response) {
 
   // The outgoing status.
   var statusCode;
-  if(request.method === 'GET' && parsedUrl.pathname === '/classes/messages'){
+  if (request.method === 'GET' && parsedUrl.pathname === '/classes/messages') {
     statusCode = 200;
-  } else if(request.method === 'POST' && parsedUrl.pathname === '/classes/messages'){
+  } else if (request.method === 'POST' && parsedUrl.pathname === '/classes/messages') {
     statusCode = 201;
     request.on('data', function(chunk) {
-      console.log(chunk, 'chunk');
-      messages.push(chunk);
+      messages.push(JSON.parse(chunk));
       // needsConcat.push(chunk);
       // What's going wrong:
       // the entire chunk is being made into a string 
@@ -87,8 +86,6 @@ exports.requestHandler = function(request, response) {
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
-  console.log({results: messages});
-  console.log(JSON.stringify({results: messages}));
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
