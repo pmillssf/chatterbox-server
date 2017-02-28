@@ -15,7 +15,7 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var messages = [];
+var messages = [{username: 'Mel Brooks', text: 'It\'s good to be the king, twetwe', roomname: 'lobby'}];
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -50,15 +50,18 @@ exports.requestHandler = function(request, response) {
   // console.log(request.end);
   var needsConcat = [];
   var parsedUrl = url.parse(request.url, true);
-
+  console.log(parsedUrl);
   // The outgoing status.
   var statusCode;
-  if (request.method === 'GET' && parsedUrl.pathname === '/classes/messages') {
+  if (request.method === 'OPTIONS') {
+    statusCode = 200;
+  } else if (request.method === 'GET' && parsedUrl.pathname === '/classes/messages') {
     statusCode = 200;
   } else if (request.method === 'POST' && parsedUrl.pathname === '/classes/messages') {
     statusCode = 201;
     request.on('data', function(chunk) {
-      messages.push(JSON.parse(chunk));
+      console.log(chunk, 'chunk');
+      needsConcat.push(chunk);
       // needsConcat.push(chunk);
       // What's going wrong:
       // the entire chunk is being made into a string 
@@ -67,6 +70,11 @@ exports.requestHandler = function(request, response) {
       //'{"username":"Jono","message":"Do my bidding!"}' ]
       // it should be: // messages = [ {"username":"Jono","message":"Do my bidding!"},
       //{"username":"Jono","message":"Do my bidding!"} ]
+    }).on('end', function() {
+      needsConcat = Buffer.concat(needsConcat).toString();
+      // console.log(needsConcat, 'buffer-string');
+      // messages.push(needsConcat);
+      console.log(url.parse(needsConcat));
     });
   } else {
     statusCode = 404;
@@ -94,6 +102,10 @@ exports.requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
+  request.on('error', function(err) {
+    console.log(err);
+    statusCode = 400;
+  });
 
   response.end(JSON.stringify({results: messages}));
 };
