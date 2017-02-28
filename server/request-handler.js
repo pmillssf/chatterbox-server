@@ -58,8 +58,16 @@ exports.requestHandler = function(request, response) {
   } else if(request.method === 'POST' && parsedUrl.pathname === '/classes/messages'){
     statusCode = 201;
     request.on('data', function(chunk) {
+      console.log(chunk, 'chunk');
       messages.push(chunk);
       // needsConcat.push(chunk);
+      // What's going wrong:
+      // the entire chunk is being made into a string 
+      //example :
+      // messages = [ '{"username":"Jono","message":"Do my bidding!"}',
+      //'{"username":"Jono","message":"Do my bidding!"}' ]
+      // it should be: // messages = [ {"username":"Jono","message":"Do my bidding!"},
+      //{"username":"Jono","message":"Do my bidding!"} ]
     });
   } else {
     statusCode = 404;
