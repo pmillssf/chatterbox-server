@@ -1,3 +1,4 @@
+var url = require('url');
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
 // are on different domains, for instance, your chat client.
@@ -13,6 +14,8 @@ var defaultCorsHeaders = {
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
+
+var messages = [];
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -42,16 +45,27 @@ exports.requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
+
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  console.log(request.url);
+  // console.log(request.end);
+  var needsConcat = [];
+  var parsedUrl = url.parse(request.url, true);
 
   // The outgoing status.
   var statusCode;
-  if(request.method === 'GET' && request.url === '/classes/messages'){
+  if(request.method === 'GET' && parsedUrl.pathname === '/classes/messages'){
     statusCode = 200;
+  } else if(request.method === 'POST' && parsedUrl.pathname === '/classes/messages'){
+    statusCode = 201;
+    request.on('data', function(chunk) {
+      messages.push(chunk);
+      // needsConcat.push(chunk);
+    });
   } else {
     statusCode = 404;
   }
+
+
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -65,6 +79,8 @@ exports.requestHandler = function(request, response) {
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
+  console.log({results: messages});
+  console.log(JSON.stringify({results: messages}));
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -74,5 +90,5 @@ exports.requestHandler = function(request, response) {
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
 
-  response.end(JSON.stringify('Hello, World!'));
+  response.end(JSON.stringify({results: messages}));
 };
