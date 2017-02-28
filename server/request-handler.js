@@ -69,6 +69,3 @@ exports.requestHandler = function(request, response) {
   // node to actually send all the data over to the client.
   response.end('Hello, World!');
 };
-
-
-// exports.requestHandler = requestHandler;
